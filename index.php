@@ -1,23 +1,25 @@
-<<<<<<< HEAD
 <?php
 
 header("Content-Type: text/plain; charset=UTF-8");
 
+
 /* =========================================================
    LINE ACCESS TOKEN
+   อ่านจาก Render Environment Variable
 ========================================================= */
 
-$access_token = "8rCwm7/Y8U6ccPjUV9XbnEWe/bPZpuhxE7piiR9lE0LlPrVA6+4QPQxodB3GDEQv+0KhsGrejWjG4RuwfoM82D+LqKj5okz1bcxsyNr3QxK3rpsbLmY6gyCbm605kmx6XUJydcwCtbMY0VlSaRCJuQdB04t89/1O/w1cDnyilFU=";
+$access_token = getenv("LINE_ACCESS_TOKEN");
 
 
 /* =========================================================
    DATABASE
+   อ่านจาก Render Environment Variables
 ========================================================= */
 
-$db_host = "sql108.infinityfree.com";
-$db_user = "if0_42713086";
-$db_pass = "mB3Y9lLd7R";
-$db_name = "if0_42713086_bot_db";
+$db_host = getenv("DB_HOST");
+$db_user = getenv("DB_USER");
+$db_pass = getenv("DB_PASSWORD");
+$db_name = getenv("DB_NAME");
 
 
 /* =========================================================
@@ -73,10 +75,12 @@ function callDialogflow($text, $sessionId)
     global $dialogflow_project_id;
     global $dialogflow_credentials;
 
+
     writeLog(
         "Dialogflow INPUT: " .
         $text
     );
+
 
     /* =====================================================
        CHECK CREDENTIAL FILE
@@ -103,6 +107,7 @@ function callDialogflow($text, $sessionId)
         file_get_contents(
             $dialogflow_credentials
         );
+
 
     $credentials =
         json_decode(
@@ -158,6 +163,7 @@ function callDialogflow($text, $sessionId)
 
     $now = time();
 
+
     $claim = array(
 
         "iss" =>
@@ -187,6 +193,7 @@ function callDialogflow($text, $sessionId)
                 $header
             )
         );
+
 
     $base64Claim =
         base64UrlEncode(
@@ -229,6 +236,7 @@ function callDialogflow($text, $sessionId)
     ===================================================== */
 
     $signature = "";
+
 
     $signResult =
         openssl_sign(
@@ -292,17 +300,20 @@ function callDialogflow($text, $sessionId)
         true
     );
 
+
     curl_setopt(
         $tokenCh,
         CURLOPT_RETURNTRANSFER,
         true
     );
 
+
     curl_setopt(
         $tokenCh,
         CURLOPT_POSTFIELDS,
         $tokenPost
     );
+
 
     curl_setopt(
         $tokenCh,
@@ -377,10 +388,12 @@ function callDialogflow($text, $sessionId)
             "ไม่สามารถขอ Google Access Token"
         );
 
+
         writeLog(
             "TOKEN RESPONSE: " .
             $tokenResponse
         );
+
 
         return array(
             "success" => false
@@ -459,17 +472,20 @@ function callDialogflow($text, $sessionId)
         true
     );
 
+
     curl_setopt(
         $ch,
         CURLOPT_RETURNTRANSFER,
         true
     );
 
+
     curl_setopt(
         $ch,
         CURLOPT_POSTFIELDS,
         $jsonBody
     );
+
 
     curl_setopt(
         $ch,
@@ -580,6 +596,7 @@ function callDialogflow($text, $sessionId)
 
     $intentName = "";
 
+
     if (
         isset(
             $queryResult["intent"]["displayName"]
@@ -623,6 +640,7 @@ function callDialogflow($text, $sessionId)
         "Dialogflow Intent: " .
         $intentName
     );
+
 
     writeLog(
         "Dialogflow Response: " .
@@ -686,6 +704,7 @@ function getProductMessages($conn)
             "SQL ERROR: " .
             $conn->error
         );
+
 
         return array(
 
@@ -784,6 +803,7 @@ function getProductMessages($conn)
             "type" =>
                 "bubble",
 
+
             "hero" =>
                 array(
 
@@ -802,6 +822,7 @@ function getProductMessages($conn)
                     "aspectMode" =>
                         "cover"
                 ),
+
 
             "body" =>
                 array(
@@ -836,6 +857,7 @@ function getProductMessages($conn)
                                     true
                             ),
 
+
                             array(
 
                                 "type" =>
@@ -860,6 +882,7 @@ function getProductMessages($conn)
                             )
                         )
                 ),
+
 
             "footer" =>
                 array(
@@ -970,6 +993,31 @@ writeLog(
 
 
 /* =========================================================
+   CHECK ENVIRONMENT VARIABLES
+========================================================= */
+
+if (
+    !$access_token ||
+    !$db_host ||
+    !$db_user ||
+    !$db_name
+) {
+
+    writeLog(
+        "ENV ERROR: Environment Variables ไม่ครบ"
+    );
+
+    http_response_code(
+        500
+    );
+
+    echo "ENV ERROR";
+
+    exit;
+}
+
+
+/* =========================================================
    DATABASE CONNECT
 ========================================================= */
 
@@ -991,9 +1039,11 @@ if (
         $conn->connect_error
     );
 
+
     http_response_code(
         500
     );
+
 
     echo "DB ERROR";
 
@@ -1030,6 +1080,7 @@ if (
         "RAW ว่าง"
     );
 
+
     echo "OK";
 
     exit;
@@ -1054,6 +1105,7 @@ if (!$events) {
         json_last_error_msg()
     );
 
+
     echo "OK";
 
     exit;
@@ -1070,6 +1122,7 @@ if (
         "ไม่พบ events"
     );
 
+
     echo "OK";
 
     exit;
@@ -1084,6 +1137,7 @@ foreach (
     $events["events"]
     as $event
 ) {
+
 
     /* =====================================================
        EVENT TYPE
@@ -1436,6 +1490,7 @@ $conn->close();
 http_response_code(
     200
 );
+
 
 echo "OK";
 
