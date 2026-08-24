@@ -1,0 +1,10 @@
+credentials/
+log.txt
+dialogflow-log.txt
+test-log.txt
+ngrok.exe
+phpinfo.php
+test.php
+test_dialogflow.php
+dialogflow.php
+dialogflow_webhook.php
